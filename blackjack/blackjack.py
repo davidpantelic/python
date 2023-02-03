@@ -96,6 +96,7 @@ class Player:
     while not self.bust:
       if self.cards_value_sum() > 21:
         print('You are Busted!')
+        print(f'{dealer_1.name} wins!')
         self.bust = True
       else:
         #hit_or_stand_input = 'Hit'
@@ -207,8 +208,15 @@ class Referee:
 
       game_on = False
       return game_on
-    else:
+
+    elif player.cards_value_sum() < dealer.cards_value_sum():
       print(f'{dealer.name} is winnerrrr!')
+      game_on = False
+      return game_on
+
+    else:
+      player.add_cash(player_1_bet)
+      print('It\'s a tie!')
       game_on = False
       return game_on
 
@@ -240,10 +248,14 @@ player_1.show_all_cards()
 
 time.sleep(0.5)
 
+referee_1.dealer_wins(dealer_1)
 referee_1.player_wins(player_1)
+referee_1.dealer_busts(dealer_1, player_1)
+referee_1.player_busts(player_1, dealer_1)
 
 player_1.hit_or_stand()
 
+referee_1.player_wins(player_1)
 referee_1.player_busts(player_1, dealer_1)
 
 if player_1.player_stands:
