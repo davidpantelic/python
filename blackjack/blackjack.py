@@ -191,7 +191,7 @@ class Referee:
     elif player.cards_value_sum() == 21:
       print(f'{player.name} is winner!')
 
-      player.add_cash(player_1_bet*2)
+      player.add_cash(int(player_1_bet)*2)
 
       self.go_for_winner_check = False
       gameover = True
@@ -200,7 +200,7 @@ class Referee:
       print(f'{dealer.name} is busted!')
       print(f'{player.name} is winner!')
 
-      player.add_cash(player_1_bet*2)
+      player.add_cash(int(player_1_bet)*2)
 
       self.go_for_winner_check = False
       gameover = True
@@ -217,7 +217,7 @@ class Referee:
     if player.cards_value_sum() > dealer.cards_value_sum():
       print(f'{player.name} is winnerrrr!')
 
-      player.add_cash(player_1_bet*2)
+      player.add_cash(int(player_1_bet)*2)
 
       gameover = True
 
@@ -226,7 +226,7 @@ class Referee:
       gameover = True
 
     elif player.cards_value_sum() == dealer.cards_value_sum():
-      player.add_cash(player_1_bet)
+      player.add_cash(int(player_1_bet))
       print('It\'s a tie!')
       gameover = True
     return gameover
@@ -285,9 +285,10 @@ while game_on:
     player_1.add_cards(new_deck.deal(2))
 
     while not gameover:
+      referee_1.go_for_winner_check = True
+      
       time.sleep(0.5)
 
-      #dealer_1.show_one_card()
       dealer_1.show_all_cards()
       player_1.show_all_cards()
 
@@ -314,7 +315,6 @@ while game_on:
       
       time.sleep(0.5)
 
-      #dealer_1.show_one_card()
       dealer_1.show_all_cards()
       player_1.show_all_cards()
       
