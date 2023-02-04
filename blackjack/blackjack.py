@@ -68,13 +68,10 @@ class Player:
     return cards_value
 
   def show_one_card(self):
-    print(f'{self.name}\'s one card:')
-    print(self.players_cards[-1])
+    print(f'{self.name}\'s one card: \n{self.players_cards[-1]}')
 
   def show_all_cards(self):
-    print(f'{self.name}\'s all cards:')
-    for card in self.players_cards:
-      print(card)
+    print(f'{self.name}\'s all cards: ', *self.players_cards,sep='\n')
 
   def place_bet(self, bet_amt):
     if self.cash >= bet_amt:
@@ -144,13 +141,10 @@ class Dealer:
     return cards_value
 
   def show_one_card(self):
-    print(f'{self.name}\'s one card:')
-    print(self.dealers_cards[-1])
+    print(f'{self.name}\'s one card: \n{self.dealers_cards[-1]}')
 
   def show_all_cards(self):
-    print(f'{self.name}\'s all cards:')
-    for card in self.dealers_cards:
-      print(card)
+    print(f'{self.name}\'s all cards: ', *self.dealers_cards,sep='\n')
 
   def hit(self):
     dealer_bust = False
@@ -237,17 +231,26 @@ class Referee:
 game_on = True
 
 while game_on:
-  print('Blackjack starts!')
+  print('\nWelcome to BlackJack game!')
   playing = True
   gameover = False
   
   time.sleep(0.5)
 
-  #player_1_name = input('Please, enter your name: ')
-  player_1_name = 'David'
+  player_1_name = input('Please, enter your name: ')
+  #player_1_name = 'David'
   time.sleep(0.5)
-  #player_1_cash = int(input('How much money you\'ve bringed with you: '))
-  player_1_cash = 1000
+
+  while True:
+    try:
+      player_1_cash = int(input('How much money you\'ve bringed with you: '))
+    except:
+      print('Please enter a number...')
+    else:
+      break
+
+
+  #player_1_cash = 1000
 
   dealer_1 = Dealer()
   player_1 = Player(player_1_name, player_1_cash)
@@ -255,7 +258,7 @@ while game_on:
   time.sleep(0.5)
 
   while playing:
-    print('New game is on -->')
+    print('\nNew game is on -->')
     time.sleep(0.5)
 
     while True:
@@ -295,6 +298,8 @@ while game_on:
       time.sleep(0.5)
 
       referee_1.win_check(player_1, dealer_1)
+      if dealer_1.cards_value_sum() == 21:
+        dealer_1.show_all_cards()
       if gameover:
         break
       
@@ -352,6 +357,6 @@ while game_on:
     if game_on_input.lower() == 'yes':
       gameover = False
     elif game_on_input.lower() == 'no':
-      print('GAME OVER')
+      print('\nGame over, thank you for playing!')
       playing = False
       game_on = False
