@@ -81,8 +81,6 @@ class Player:
       self.cash -= bet_amt
       self.bet += bet_amt
       return f'{self.name}\'s bet is {bet_amt}'
-    else:
-      print('Not enough cash...')
 
   def add_cash(self, add_amt):
     self.cash += add_amt
@@ -93,22 +91,35 @@ class Player:
   def hit_or_stand(self):
     self.bust = False
     self.player_stands = False
+    global gameover
+    
     while not self.bust:
       if self.cards_value_sum() > 21:
         print('You are Busted!')
-        print(f'{dealer_1.name} wins!')
+        #print(f'{dealer_1.name} wins!')
+        gameover = True
         self.bust = True
       else:
         #hit_or_stand_input = 'Hit'
-        hit_or_stand_input = input(f'{self.name}, do you want to Hit or Stand? ')
-        if hit_or_stand_input.capitalize() == 'Hit':
+        while True:
+          hit_or_stand_input = input(f'{self.name}, do you want to Hit or Stand? ')
+
+          if hit_or_stand_input.lower() in ['hit', 'stand']:
+            break
+
+        if hit_or_stand_input.lower() == 'hit':
           self.add_cards(new_deck.deal(1))
+          time.sleep(0.5)
           print(self.players_cards[-1])
-        elif hit_or_stand_input.capitalize() == 'Stand':
+          if player_1.cards_value_sum() == 21:
+            print('Hit win!')
+            break
+        elif hit_or_stand_input.lower() == 'stand':
           self.player_stands = True
           print(f'{self.name} stands...')
+          time.sleep(0.5)
           break
-    return self.player_stands
+    return self.player_stands, gameover
 
   def __str__(self):
     return f'{self.name} has {len(self.players_cards)} cards, and {self.cash} left'
@@ -145,13 +156,18 @@ class Dealer:
     dealer_bust = False
     while not dealer_bust:
       if self.cards_value_sum() < 17:
-        print(f'{self.cards_value_sum()} djokara')
+        #print(f'{self.cards_value_sum()} djokara')
         print(f'{self.name} hits!')
         self.add_cards(new_deck.deal(1))
+        time.sleep(0.5)
         print(self.dealers_cards[-1])
+        if dealer_1.cards_value_sum() == 21:
+          print('Hit win!')
+          break
       else:
         dealer_bust = True
     else:
+      time.sleep(0.5)
       print(f'{self.name} is done, and value of his cards is {self.cards_value_sum()}')
 
   def __str__(self):
@@ -164,107 +180,178 @@ class Referee:
     self.dealer = dealer
     self.go_for_winner_check = True
 
-  def player_busts(self, player, dealer):
+  def win_check(self, player, dealer):
+    global gameover
     if player.cards_value_sum() > 21:
       print(f'{player.name} is busted!')
       print(f'{dealer.name} is winner!')
       self.go_for_winner_check = False
-      game_on = False
-      return game_on, self.go_for_winner_check
+      gameover = True
 
-  def player_wins(self, player):
-    if player.cards_value_sum() == 21:
+    elif player.cards_value_sum() == 21:
       print(f'{player.name} is winner!')
 
       player.add_cash(player_1_bet*2)
 
       self.go_for_winner_check = False
-      game_on = False
-      return game_on, self.go_for_winner_check
+      gameover = True
 
-  def dealer_busts(self, dealer, player):
-    if dealer.cards_value_sum() > 21:
+    elif dealer.cards_value_sum() > 21:
       print(f'{dealer.name} is busted!')
       print(f'{player.name} is winner!')
 
       player.add_cash(player_1_bet*2)
 
       self.go_for_winner_check = False
-      game_on = False
-      return game_on, self.go_for_winner_check
+      gameover = True
       
-  def dealer_wins(self, dealer):
-    if dealer.cards_value_sum() == 21:
+    elif dealer.cards_value_sum() == 21:
       print(f'{dealer.name} is winner!')
       self.go_for_winner_check = False
-      game_on = False
-      return game_on, self.go_for_winner_check
+      gameover = True
+    return gameover, self.go_for_winner_check
       
-  def winner(self, player, dealer):
+  def close_winner(self, player, dealer):
+    print('close win:')
+    global gameover
     if player.cards_value_sum() > dealer.cards_value_sum():
       print(f'{player.name} is winnerrrr!')
 
       player.add_cash(player_1_bet*2)
 
-      game_on = False
-      return game_on
+      gameover = True
 
     elif player.cards_value_sum() < dealer.cards_value_sum():
       print(f'{dealer.name} is winnerrrr!')
-      game_on = False
-      return game_on
+      gameover = True
 
-    else:
+    elif player.cards_value_sum() == dealer.cards_value_sum():
       player.add_cash(player_1_bet)
       print('It\'s a tie!')
+      gameover = True
+    return gameover
+
+
+###### GAME ON ########
+
+game_on = True
+
+while game_on:
+  print('Blackjack starts!')
+  playing = True
+  gameover = False
+  
+  time.sleep(0.5)
+
+  #player_1_name = input('Please, enter your name: ')
+  player_1_name = 'David'
+  time.sleep(0.5)
+  #player_1_cash = int(input('How much money you\'ve bringed with you: '))
+  player_1_cash = 1000
+
+  dealer_1 = Dealer()
+  player_1 = Player(player_1_name, player_1_cash)
+  referee_1 = Referee(player_1, dealer_1)
+  time.sleep(0.5)
+
+  while playing:
+    print('New game is on -->')
+    time.sleep(0.5)
+
+    while True:
+      player_1_bet = input(f'{player_1.name} please, place your bet: ')
+
+      if not player_1_bet.isdigit():
+        time.sleep(0.5)
+        print('Enter a number please...')
+
+      elif player_1_bet.isdigit():
+        if player_1_cash < int(player_1_bet):
+          time.sleep(0.5)
+          print('Not enough cash...')
+
+        else:
+          player_1.place_bet(int(player_1_bet))
+          break
+
+
+    new_deck = Deck()
+    new_deck.shuffle()
+
+    dealer_1.dealers_cards = []
+    dealer_1.add_cards(new_deck.deal(2))
+
+    player_1.players_cards = []
+    player_1.add_cards(new_deck.deal(2))
+
+    while not gameover:
+      time.sleep(0.5)
+
+      #dealer_1.show_one_card()
+      dealer_1.show_all_cards()
+      player_1.show_all_cards()
+
+      time.sleep(0.5)
+
+      referee_1.win_check(player_1, dealer_1)
+      if gameover:
+        break
+      
+      time.sleep(0.5)
+
+      player_1.hit_or_stand()
+      
+      time.sleep(0.5)
+
+      referee_1.win_check(player_1, dealer_1)
+      if gameover:
+        break
+      
+      time.sleep(0.5)
+
+      if player_1.player_stands:
+        dealer_1.hit()
+      
+      time.sleep(0.5)
+
+      #dealer_1.show_one_card()
+      dealer_1.show_all_cards()
+      player_1.show_all_cards()
+      
+      time.sleep(0.5)
+
+      referee_1.win_check(player_1, dealer_1)
+      if gameover:
+        break
+      
+      time.sleep(0.5)
+
+      if referee_1.go_for_winner_check:
+        referee_1.close_winner(player_1, dealer_1)
+      
+      time.sleep(0.5)
+
+    print(f'{player_1.name}, now you have {player_1.cash} rsd')
+      
+    time.sleep(0.5)
+
+    if player_1.cash <= 0:
+      print('You don\'t have any cash left...')
+      playing = False
       game_on = False
-      return game_on
+      break
+    else:
+      while True:
+        game_on_input = input(f'{player_1.name}, do you want to play again? ')
 
+        if game_on_input.lower() in ['yes', 'no']:
+          break
+      
+    time.sleep(0.5)
 
-
-
-###############################
-player_1_name = 'David'
-#player_1_name = input('Please, enter your name: ')
-player_1_cash = 1000
-#player_1_cash = int(input('How much money you\'ve bringed with you: '))
-
-dealer_1 = Dealer()
-player_1 = Player(player_1_name, player_1_cash)
-referee_1 = Referee(player_1, dealer_1)
-
-player_1_bet = 100
-#player_1_bet = int(input(f'{player_1.name} please, place your bet: '))
-player_1.place_bet(player_1_bet)
-
-new_deck = Deck()
-new_deck.shuffle()
-dealer_1.add_cards(new_deck.deal(2))
-player_1.add_cards(new_deck.deal(2))
-print(player_1_bet)
-#dealer_1.show_one_card()
-dealer_1.show_all_cards()
-player_1.show_all_cards()
-
-time.sleep(0.5)
-
-referee_1.dealer_wins(dealer_1)
-referee_1.player_wins(player_1)
-referee_1.dealer_busts(dealer_1, player_1)
-referee_1.player_busts(player_1, dealer_1)
-
-player_1.hit_or_stand()
-
-referee_1.player_wins(player_1)
-referee_1.player_busts(player_1, dealer_1)
-
-if player_1.player_stands:
-  dealer_1.hit()
-
-referee_1.dealer_wins(dealer_1)
-referee_1.dealer_busts(dealer_1, player_1)
-
-if referee_1.go_for_winner_check:
-  referee_1.winner(player_1, dealer_1)
-
-print(player_1.cash)
+    if game_on_input.lower() == 'yes':
+      gameover = False
+    elif game_on_input.lower() == 'no':
+      print('GAME OVER')
+      playing = False
+      game_on = False
