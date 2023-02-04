@@ -289,7 +289,7 @@ while game_on:
       
       time.sleep(0.5)
 
-      dealer_1.show_all_cards()
+      dealer_1.show_one_card()
       player_1.show_all_cards()
 
       time.sleep(0.5)
